@@ -11,16 +11,17 @@
   </parent>
 
   <artifactId>vertx-zookeeper</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.1.0-SNAPSHOT</version>
 
   <name>Vert.x Zookeeper Cluster Manager</name>
 
   <properties>
-    <stack.version>3.0.0</stack.version>
+    <stack.version>3.1.0</stack.version>
     <curator.version>2.8.0</curator.version>
     <junit.version>4.11</junit.version>
     <log4j.version>1.2.16</log4j.version>
     <slf4j.version>1.7.5</slf4j.version>
+    <typesafe.version>1.3.0</typesafe.version>
   </properties>
 
   <dependencyManagement>
@@ -49,10 +50,6 @@
         <exclusion>
           <groupId>jline</groupId>
           <artifactId>jline</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
         </exclusion>
         <exclusion>
           <groupId>log4j</groupId>
@@ -159,5 +156,13 @@
       </plugin>
     </plugins>
   </build>
+
+  <distributionManagement>
+    <repository>
+      <id>nexus</id>
+      <name>Nexus Test Repository</name>
+      <url>http://localhost:8080/nexus-2.9.2-01/content/repositories/releases</url>
+    </repository>
+  </distributionManagement>
 
 </project>
