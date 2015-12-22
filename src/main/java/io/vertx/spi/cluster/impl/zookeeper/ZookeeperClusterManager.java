@@ -23,6 +23,8 @@ import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -59,11 +61,11 @@ public class ZookeeperClusterManager implements ClusterManager, PathChildrenCach
 
   public ZookeeperClusterManager() {
     try {
-      if (System.getProperties().contains("zookeeper.conf")) {
-        conf.load(getConfigStream(System.getProperty("zookeeper.conf")));
-      } else {
-        conf.load(getConfigStream(CONFIG_FILE));
-      }
+      String resourceLocation = System.getProperty("vertx.zookeeper.conf", CONFIG_FILE);
+      conf.load(getConfigStream(resourceLocation));
+      log.info("Loaded Zookeeper.properties file from resourceLocation=" + resourceLocation);
+    } catch (FileNotFoundException e) {
+      log.error("Could not find zookeeper config file", e);
     } catch (IOException e) {
       log.error("Failed to load zookeeper config", e);
     }
@@ -79,13 +81,16 @@ public class ZookeeperClusterManager implements ClusterManager, PathChildrenCach
     this.curator = curator;
   }
 
-  private InputStream getConfigStream(String resourceLocation) {
+  private InputStream getConfigStream(String resourceLocation) throws FileNotFoundException {
     ClassLoader ctxClsLoader = Thread.currentThread().getContextClassLoader();
     InputStream is = null;
     if (ctxClsLoader != null) {
       is = ctxClsLoader.getResourceAsStream(resourceLocation);
     }
-    if (is == null) {
+    if (is == null && !resourceLocation.equals(CONFIG_FILE)) {
+      is = new FileInputStream(resourceLocation);
+    }
+    else if (is == null && resourceLocation.equals(CONFIG_FILE)) {
       is = getClass().getClassLoader().getResourceAsStream(resourceLocation);
       if (is == null) {
         is = getClass().getClassLoader().getResourceAsStream(DEFAULT_CONFIG_FILE);
