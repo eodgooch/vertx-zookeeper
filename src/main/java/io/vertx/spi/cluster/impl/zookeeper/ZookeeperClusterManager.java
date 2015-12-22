@@ -59,7 +59,11 @@ public class ZookeeperClusterManager implements ClusterManager, PathChildrenCach
 
   public ZookeeperClusterManager() {
     try {
-      conf.load(getConfigStream());
+      if (System.getProperties().contains("zookeeper.conf")) {
+        conf.load(getConfigStream(System.getProperty("zookeeper.conf")));
+      } else {
+        conf.load(getConfigStream(CONFIG_FILE));
+      }
     } catch (IOException e) {
       log.error("Failed to load zookeeper config", e);
     }
@@ -75,14 +79,14 @@ public class ZookeeperClusterManager implements ClusterManager, PathChildrenCach
     this.curator = curator;
   }
 
-  private InputStream getConfigStream() {
+  private InputStream getConfigStream(String resourceLocation) {
     ClassLoader ctxClsLoader = Thread.currentThread().getContextClassLoader();
     InputStream is = null;
     if (ctxClsLoader != null) {
-      is = ctxClsLoader.getResourceAsStream(CONFIG_FILE);
+      is = ctxClsLoader.getResourceAsStream(resourceLocation);
     }
     if (is == null) {
-      is = getClass().getClassLoader().getResourceAsStream(CONFIG_FILE);
+      is = getClass().getClassLoader().getResourceAsStream(resourceLocation);
       if (is == null) {
         is = getClass().getClassLoader().getResourceAsStream(DEFAULT_CONFIG_FILE);
       }
